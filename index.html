@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<!--初始缩放比例为1.0, 最大缩放比例为1.0, 不可缩放, 视口适配设备宽度,占满设备屏幕 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<!-- pwa基础配置，使页面在苹果设备上像原生应用一样运行，添加到主屏幕，状态栏颜色为透明 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4A90E2">
+    <title>极简记账</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<!-- 顶部状态栏/标题 -->
+    <header class="app-header">
+        <h1>9月账单</h1>
+        <div class="budget-info">预算：¥1000 | 已用：¥500 | 剩余：¥500</div>
+    </header>
+
+<!-- 中间内容区：账单列表 -->
+    <main class="app-content" id="transaction-list">
+<!-- JS会在这里动态生成账单列表 -->
+        <div class="empty-state">还没有账单，点击下方+记一笔吧</div>
+    </main>
+<!-- 底部悬浮按钮：添加账单 -->
+    <button class="fab-add" id="btn-add">+</button>
+
+<!-- 底部安全区占位 -->
+     <div class="safe-area-bottom"></div>
+  <script src="./main.js"></script>  
+</body>
+</html>
