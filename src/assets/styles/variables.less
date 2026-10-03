@@ -1,0 +1,21 @@
+// 设计变量：语义化命名，便于主题统一管理
+@primary-color: #4A90E2;
+@danger-color: #FF4D4F;
+@bg-color: #F5F7FA;
+@card-bg: #FFFFFF;
+
+@text-main: #333333;
+@text-sub: #999999;
+
+@border-radius: 12px;
+
+// 将 Less 变量同步为 CSS 变量，便于运行时动态读取（如内联样式、JS 计算）
+:root {
+  --primary-color: @primary-color;
+  --danger-color: @danger-color;
+  --bg-color: @bg-color;
+  --card-bg: @card-bg;
+  --text-main: @text-main;
+  --text-sub: @text-sub;
+  --border-radius: @border-radius;
+}
