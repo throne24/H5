@@ -1,7 +1,18 @@
 <script setup>
-const budget = 3000;
-const spent = 0;
-const percent = 0;
+defineProps({
+  budget: {
+    type: Number,
+    required: true,
+  },
+  spent: {
+    type: Number,
+    required: true,
+  },
+  percent: {
+    type: Number,
+    required: true,
+  },
+});
 </script>
 
 <template>
