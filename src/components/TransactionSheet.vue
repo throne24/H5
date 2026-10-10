@@ -1,7 +1,12 @@
 <script setup>
-// 开发期间临时展示面板以校验样式
-// 业务阶段通过父组件传入的 visible 控制
-const visible = false;
+defineProps({
+  visible: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(["close"]);
 
 const categories = [
   { name: "餐饮", icon: "🍜" },
@@ -18,7 +23,11 @@ const selectedCategory = "餐饮";
 </script>
 
 <template>
-  <div v-if="visible" class="modal-overlay active"></div>
+  <div
+    v-if="visible"
+    class="modal-overlay active"
+    @click.self="emit('close')"
+  ></div>
   <div v-if="visible" class="action-sheet active">
     <div class="sheet-title">记一笔支出</div>
 
@@ -45,8 +54,21 @@ const selectedCategory = "餐饮";
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-cancel">取消</button>
-      <button class="btn btn-save">保存</button>
+      <button
+        type="button"
+        class="btn btn-cancel"
+        @click="emit('close')"
+      >
+        取消
+      </button>
+      <button
+        type="button"
+        class="btn btn-save"
+        disabled
+        title="保存功能将在下一阶段实现"
+      >
+        保存
+      </button>
     </div>
   </div>
 </template>
@@ -182,5 +204,10 @@ const selectedCategory = "餐饮";
 .btn-save {
   background: @primary-color;
   color: #fff;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 </style>

@@ -7,6 +7,15 @@ import AddButton from "./components/AddButton.vue";
 import TransactionSheet from "./components/TransactionSheet.vue";
 
 const budgetLimit = ref(3000);
+const isSheetVisible = ref(false);
+
+function openSheet() {
+  isSheetVisible.value = true;
+}
+
+function closeSheet() {
+  isSheetVisible.value = false;
+}
 
 const transactions = ref([
   {
@@ -55,8 +64,8 @@ const budgetPercent = computed(() => {
       :percent="budgetPercent"
     />
     <TransactionList :transactions="transactions" />
-    <AddButton />
-    <TransactionSheet />
+    <AddButton @open="openSheet" />
+    <TransactionSheet :visible="isSheetVisible" @close="closeSheet" />
   </main>
 </template>
 

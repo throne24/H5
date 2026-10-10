@@ -1,5 +1,16 @@
+<script setup>
+const emit = defineEmits(["open"]);
+</script>
+
 <template>
-  <button class="fab" aria-label="记一笔">+</button>
+  <button
+    type="button"
+    class="fab"
+    aria-label="记一笔"
+    @click="emit('open')"
+  >
+    +
+  </button>
 </template>
 
 <style scoped lang="less">
