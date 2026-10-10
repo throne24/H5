@@ -8,6 +8,8 @@ defineProps({
     required: true,
   },
 });
+
+const emit = defineEmits(["delete"]);
 </script>
 
 <template>
@@ -17,6 +19,7 @@ defineProps({
         v-for="transaction in transactions"
         :key="transaction.id"
         :transaction="transaction"
+        @delete="emit('delete', $event)"
       />
     </template>
     <EmptyState v-else />

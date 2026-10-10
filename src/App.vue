@@ -71,6 +71,30 @@ function saveTransaction(draft) {
   closeSheet();
 }
 
+function deleteTransaction(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return;
+  }
+
+  const target = transactions.value.find(
+    (transaction) => transaction.id === id,
+  );
+  if (!target) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `确定删除这笔${target.category}账单（¥${target.amount.toFixed(2)}）吗？此操作无法撤销。`,
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  transactions.value = transactions.value.filter(
+    (transaction) => transaction.id !== id,
+  );
+}
+
 const totalExpense = computed(() => {
   const totalCents = transactions.value
     .filter((transaction) => transaction.type === "expense")
@@ -100,7 +124,10 @@ const budgetPercent = computed(() => {
       :spent="totalExpense"
       :percent="budgetPercent"
     />
-    <TransactionList :transactions="transactions" />
+    <TransactionList
+      :transactions="transactions"
+      @delete="deleteTransaction"
+    />
     <AddButton @open="openSheet" />
     <TransactionSheet
       :visible="isSheetVisible"

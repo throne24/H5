@@ -5,11 +5,12 @@ defineProps({
     required: true,
   },
 });
+
+const emit = defineEmits(["delete"]);
 </script>
 
 <template>
   <div class="transaction-card-wrapper">
-    <div class="delete-btn-bg">删除</div>
     <div class="transaction-card">
       <div class="transaction-left">
         <span class="transaction-icon">{{ transaction.icon }}</span>
@@ -19,8 +20,18 @@ defineProps({
           <div class="transaction-date">{{ transaction.date }}</div>
         </div>
       </div>
-      <div class="transaction-amount" :class="transaction.type">
-        {{ transaction.type === "income" ? "+" : "-" }}¥{{ transaction.amount.toFixed(2) }}
+      <div class="transaction-right">
+        <div class="transaction-amount" :class="transaction.type">
+          {{ transaction.type === "income" ? "+" : "-" }}¥{{ transaction.amount.toFixed(2) }}
+        </div>
+        <button
+          type="button"
+          class="transaction-delete"
+          :aria-label="`删除${transaction.category}账单，金额${transaction.amount.toFixed(2)}元`"
+          @click="emit('delete', transaction.id)"
+        >
+          删除
+        </button>
       </div>
     </div>
   </div>
@@ -40,25 +51,6 @@ defineProps({
   transition: transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease, margin-bottom 0.3s ease;
 }
 
-.delete-btn-bg {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 80px;
-  background: @danger-color;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 0 @border-radius @border-radius 0;
-  cursor: pointer;
-  z-index: 1;
-  user-select: none;
-}
-
 .transaction-card {
   position: relative;
   z-index: 2;
@@ -68,6 +60,7 @@ defineProps({
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   will-change: transform;
   touch-action: pan-y;
 }
@@ -77,16 +70,21 @@ defineProps({
 }
 
 .transaction-left {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .transaction-icon {
+  flex-shrink: 0;
   font-size: 24px;
 }
 
 .transaction-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -108,7 +106,37 @@ defineProps({
   color: @text-sub;
 }
 
+.transaction-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.transaction-delete {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 77, 79, 0.08);
+  color: @danger-color;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 2px solid @danger-color;
+    outline-offset: 2px;
+  }
+}
+
 .transaction-amount {
+  white-space: nowrap;
   font-size: 16px;
   font-weight: 600;
 
