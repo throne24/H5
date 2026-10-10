@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import { normalizeExpenseDraft } from "./utils/transaction.js";
 
 import BudgetHeader from "./components/BudgetHeader.vue";
 import TransactionList from "./components/TransactionList.vue";
@@ -38,10 +39,46 @@ const transactions = ref([
   }
 ]);
 
+function getLocalDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function saveTransaction(draft) {
+  if (!isSheetVisible.value) {
+    return;
+  }
+
+  const result = normalizeExpenseDraft(draft);
+  if (!result.data) {
+    return;
+  }
+
+  const nextId = transactions.value.reduce(
+    (maxId, item) => Math.max(maxId, item.id),
+    0,
+  ) + 1;
+
+  transactions.value.unshift({
+    ...result.data,
+    id: nextId,
+    date: getLocalDate(),
+  });
+
+  closeSheet();
+}
+
 const totalExpense = computed(() => {
-  return transactions.value
+  const totalCents = transactions.value
     .filter((transaction) => transaction.type === "expense")
-    .reduce((total, transaction) => total + transaction.amount, 0);
+    .reduce((total, transaction) => {
+      return total + Math.round(transaction.amount * 100);
+    }, 0);
+
+  return totalCents / 100;
 });
 
 const budgetPercent = computed(() => {
@@ -65,7 +102,11 @@ const budgetPercent = computed(() => {
     />
     <TransactionList :transactions="transactions" />
     <AddButton @open="openSheet" />
-    <TransactionSheet :visible="isSheetVisible" @close="closeSheet" />
+    <TransactionSheet
+      :visible="isSheetVisible"
+      @close="closeSheet"
+      @save="saveTransaction"
+    />
   </main>
 </template>
 

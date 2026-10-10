@@ -1,25 +1,62 @@
 <script setup>
-defineProps({
+import { ref, watch } from "vue";
+import {
+  expenseCategories,
+  normalizeExpenseDraft,
+} from "../utils/transaction.js";
+
+const props = defineProps({
   visible: {
     type: Boolean,
     default: false,
   },
 });
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(["close", "save"]);
 
-const categories = [
-  { name: "餐饮", icon: "🍜" },
-  { name: "交通", icon: "🚗" },
-  { name: "购物", icon: "🛍️" },
-  { name: "娱乐", icon: "🎮" },
-  { name: "居住", icon: "🏠" },
-  { name: "医疗", icon: "💊" },
-  { name: "学习", icon: "📚" },
-  { name: "其他", icon: "📝" },
-];
+const selectedCategory = ref("餐饮");
+const amountInput = ref("");
+const noteInput = ref("");
+const errorMessage = ref("");
 
-const selectedCategory = "餐饮";
+function resetForm() {
+  selectedCategory.value = "餐饮";
+  amountInput.value = "";
+  noteInput.value = "";
+  errorMessage.value = "";
+}
+
+watch(
+  () => props.visible,
+  (visible) => {
+    if (visible) {
+      resetForm();
+    }
+  },
+);
+
+watch([amountInput, noteInput, selectedCategory], () => {
+  errorMessage.value = "";
+});
+
+function submitForm() {
+  if (!props.visible) {
+    return;
+  }
+
+  const result = normalizeExpenseDraft({
+    category: selectedCategory.value,
+    amount: amountInput.value,
+    note: noteInput.value,
+  });
+
+  errorMessage.value = result.error;
+  if (!result.data) {
+    return;
+  }
+
+  emit("save", result.data);
+}
 </script>
 
 <template>
@@ -28,30 +65,62 @@ const selectedCategory = "餐饮";
     class="modal-overlay active"
     @click.self="emit('close')"
   ></div>
-  <div v-if="visible" class="action-sheet active">
+  <form
+    v-if="visible"
+    class="action-sheet active"
+    novalidate
+    @submit.prevent="submitForm"
+  >
     <div class="sheet-title">记一笔支出</div>
 
     <div class="category-grid">
-      <div
-        v-for="category in categories"
+      <button
+        v-for="category in expenseCategories"
         :key="category.name"
+        type="button"
         class="category-item"
         :class="{ selected: category.name === selectedCategory }"
+        :aria-pressed="category.name === selectedCategory"
+        @click="selectedCategory = category.name"
       >
         <span class="category-icon">{{ category.icon }}</span>
         <span class="category-name">{{ category.name }}</span>
-      </div>
+      </button>
     </div>
 
     <div class="input-group">
-      <label>金额</label>
-      <input type="number" placeholder="0.00" inputmode="decimal" />
+      <label for="transaction-amount">金额</label>
+      <input
+        id="transaction-amount"
+        v-model="amountInput"
+        type="text"
+        placeholder="0.00"
+        inputmode="decimal"
+        autocomplete="off"
+        :aria-describedby="errorMessage ? 'transaction-form-error' : undefined"
+      />
     </div>
 
     <div class="input-group">
-      <label>备注（可选）</label>
-      <input type="text" placeholder="午餐、打车..." maxlength="20" />
+      <label for="transaction-note">备注（可选）</label>
+      <input
+        id="transaction-note"
+        v-model="noteInput"
+        type="text"
+        placeholder="午餐、打车..."
+        maxlength="20"
+        :aria-describedby="errorMessage ? 'transaction-form-error' : undefined"
+      />
     </div>
+
+    <p
+      v-if="errorMessage"
+      id="transaction-form-error"
+      class="form-error"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </p>
 
     <div class="btn-group">
       <button
@@ -61,16 +130,9 @@ const selectedCategory = "餐饮";
       >
         取消
       </button>
-      <button
-        type="button"
-        class="btn btn-save"
-        disabled
-        title="保存功能将在下一阶段实现"
-      >
-        保存
-      </button>
+      <button type="submit" class="btn btn-save">保存</button>
     </div>
-  </div>
+  </form>
 </template>
 
 <style scoped lang="less">
@@ -100,6 +162,8 @@ const selectedCategory = "餐饮";
   border-radius: 16px 16px 0 0;
   padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
   z-index: 300;
+  max-height: 100dvh;
+  overflow-y: auto;
   transform: translateY(100%);
   transition: transform 0.3s ease;
 
@@ -128,12 +192,21 @@ const selectedCategory = "餐饮";
   align-items: center;
   gap: 4px;
   padding: 10px 4px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.2s;
 
   &.selected {
     background: rgba(74, 144, 226, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid @primary-color;
+    outline-offset: 2px;
   }
 }
 
@@ -176,6 +249,13 @@ const selectedCategory = "餐饮";
   }
 }
 
+.form-error {
+  margin-top: 4px;
+  color: @danger-color;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .btn-group {
   display: flex;
   gap: 10px;
@@ -204,10 +284,5 @@ const selectedCategory = "餐饮";
 .btn-save {
   background: @primary-color;
   color: #fff;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
 </style>
